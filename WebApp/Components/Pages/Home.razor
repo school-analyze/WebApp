@@ -1,7 +1,59 @@
 ﻿@page "/"
+@using Microsoft.AspNetCore.Mvc
+@using WebApp.Models
+@inject IHttpClientFactory HttpClientFactory
+@rendermode InteractiveServer
 
 <PageTitle>Home</PageTitle>
 
 <h1>Hello, world!</h1>
 
-Welcome to your new app.
+@if (Users == null)
+{
+    <p>
+        <em>Loading...</em>
+    </p>
+}
+else
+{
+    <table class="table">
+        <thead>
+        <tr>
+            <th>Id</th>
+            <th>Username</th>
+        </tr>
+        </thead>
+        <tbody>
+        @foreach (var user in Users)
+        {
+            <tr>
+                <td>@user.id</td>
+                <td>@user.userName</td>
+            </tr>
+        }
+        </tbody>
+    </table>
+}
+
+@code 
+{
+    [BindProperty]
+    public IEnumerable<UserModel>? Users { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            var client = HttpClientFactory.CreateClient("WebApp.ServerAPI");
+            var response = await client.GetAsync("/users");
+            if (response.IsSuccessStatusCode)
+            {
+                Users = await client.GetFromJsonAsync<IEnumerable<UserModel>>("/users");
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
+        }
+    }
+}
