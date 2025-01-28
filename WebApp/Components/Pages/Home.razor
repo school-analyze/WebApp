@@ -14,47 +14,40 @@
 }
 else
 {
-    <table class="table">
-        <thead>
-        <tr>
-            <th>Id</th>
-            <th>User Id</th>
-            <th>Grade</th>
-            <th>Subject</th>
-            <th>Percentage</th>
-            <th>Date</th>
-        </tr>
-        </thead>
-        <tbody>
-        @foreach (var grade in Grades)
-        {
-            <tr>
-                <td>@grade.id</td>
-                <td>@grade.userId</td>
-                <td>@grade.grade</td>
-                <td>@grade.subject</td>
-                <td>@grade.percentageInfluence</td>
-                <td>@grade.dateAdded</td>
-            </tr>
-        }
-        </tbody>
-    </table>
+    @foreach (var subjectGroup in Grades.GroupBy(g => g.subject))
+    {
+        <MudTable Items="subjectGroup" Hover="true" Dense="true" Bordered="true">
+            <ToolBarContent>
+                <MudText Typo="Typo.h6">@subjectGroup.Key</MudText>
+                <MudSpacer/>
+            </ToolBarContent>
+            <HeaderContent>
+                <MudTh>Grade</MudTh>
+                <MudTh>Percentage</MudTh>
+                <MudTh>Date</MudTh>
+            </HeaderContent>
+            <RowTemplate>
+                <MudTd>@context.grade</MudTd>
+                <MudTd>@context.percentageInfluence%</MudTd>
+                <MudTd>@context.dateAdded</MudTd>
+            </RowTemplate>
+        </MudTable>
+    }
 }
 
-@code 
+@code
 {
-    [BindProperty]
-    public IEnumerable<GradeModel>? Grades { get; set; }
+    [BindProperty] public IEnumerable<GradeModel>? Grades { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
         try
         {
             var client = HttpClientFactory.CreateClient("WebApp.ServerAPI");
-            var response = await client.GetAsync("/grades");
+            var response = await client.GetAsync("/users/1/grades");
             if (response.IsSuccessStatusCode)
             {
-                Grades = await client.GetFromJsonAsync<IEnumerable<GradeModel>>("/grades");
+                Grades = await client.GetFromJsonAsync<IEnumerable<GradeModel>>("/users/1/grades");
             }
         }
         catch (Exception ex)
