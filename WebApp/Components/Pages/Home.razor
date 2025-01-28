@@ -6,9 +6,7 @@
 
 <PageTitle>Home</PageTitle>
 
-<h1>Hello, world!</h1>
-
-@if (Users == null)
+@if (Grades == null)
 {
     <p>
         <em>Loading...</em>
@@ -20,15 +18,23 @@ else
         <thead>
         <tr>
             <th>Id</th>
-            <th>Username</th>
+            <th>User Id</th>
+            <th>Grade</th>
+            <th>Subject</th>
+            <th>Percentage</th>
+            <th>Date</th>
         </tr>
         </thead>
         <tbody>
-        @foreach (var user in Users)
+        @foreach (var grade in Grades)
         {
             <tr>
-                <td>@user.id</td>
-                <td>@user.userName</td>
+                <td>@grade.id</td>
+                <td>@grade.userId</td>
+                <td>@grade.grade</td>
+                <td>@grade.subject</td>
+                <td>@grade.percentageInfluence</td>
+                <td>@grade.dateAdded</td>
             </tr>
         }
         </tbody>
@@ -38,17 +44,17 @@ else
 @code 
 {
     [BindProperty]
-    public IEnumerable<UserModel>? Users { get; set; }
+    public IEnumerable<GradeModel>? Grades { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
         try
         {
             var client = HttpClientFactory.CreateClient("WebApp.ServerAPI");
-            var response = await client.GetAsync("/users");
+            var response = await client.GetAsync("/grades");
             if (response.IsSuccessStatusCode)
             {
-                Users = await client.GetFromJsonAsync<IEnumerable<UserModel>>("/users");
+                Grades = await client.GetFromJsonAsync<IEnumerable<GradeModel>>("/grades");
             }
         }
         catch (Exception ex)
