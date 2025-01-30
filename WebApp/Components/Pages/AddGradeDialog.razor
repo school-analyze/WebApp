@@ -1,0 +1,16 @@
+﻿<MudDialog>
+    <TitleContent>Add Grade</TitleContent>
+    <DialogActions>
+        <MudButton OnClick="Submit">Submit</MudButton>
+        <MudButton OnClick="Cancel">Cancel</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter]
+    private IMudDialogInstance MudDialog { get; set; }
+
+    private void Submit() => MudDialog.Close(DialogResult.Ok(true));
+
+    private void Cancel() => MudDialog.Cancel();
+}

@@ -33,7 +33,7 @@ public partial class Home
         var totalPercentageInfluence = subjectGroup.Sum(g => g.percentageInfluence);
         return Math.Round(totalWeightedGrades / totalPercentageInfluence, 2);
     }
-    
+
     private MudColor GetGradeColor(decimal grade)
     {
         if (grade >= 6)
@@ -48,5 +48,12 @@ public partial class Home
         {
             return _theme.PaletteLight.Error;
         }
+    }
+
+    private Task OpenDialogAsync()
+    {
+        var options = new DialogOptions { CloseOnEscapeKey = true };
+
+        return DialogService.ShowAsync<AddGradeDialog>("Simple Dialog", options);
     }
 }
