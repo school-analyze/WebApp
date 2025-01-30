@@ -16,10 +16,11 @@ else
 {
     @foreach (var subjectGroup in Grades.GroupBy(g => g.subject))
     {
-        <MudTable Items="subjectGroup" Hover="true" Dense="true" Bordered="true">
+        <MudTable Items="subjectGroup" Hover="true" Dense="true" Bordered="true" Class="mb-5">
             <ToolBarContent>
-                <MudText Typo="Typo.h6">@subjectGroup.Key</MudText>
+                <MudText Typo="Typo.h6" Class="fw-bold">@subjectGroup.Key</MudText>
                 <MudSpacer/>
+                <MudText Typo="Typo.h6" Class="fw-bold" Style="@($"color:{GetGradeColor(SubjectAverageGrade(subjectGroup))}")">Average grade: @SubjectAverageGrade(subjectGroup)</MudText>
             </ToolBarContent>
             <HeaderContent>
                 <MudTh>Grade</MudTh>
@@ -32,27 +33,5 @@ else
                 <MudTd>@context.dateAdded</MudTd>
             </RowTemplate>
         </MudTable>
-    }
-}
-
-@code
-{
-    [BindProperty] public IEnumerable<GradeModel>? Grades { get; set; }
-
-    protected override async Task OnInitializedAsync()
-    {
-        try
-        {
-            var client = HttpClientFactory.CreateClient("WebApp.ServerAPI");
-            var response = await client.GetAsync("/users/1/grades");
-            if (response.IsSuccessStatusCode)
-            {
-                Grades = await client.GetFromJsonAsync<IEnumerable<GradeModel>>("/users/1/grades");
-            }
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine(ex);
-        }
     }
 }
