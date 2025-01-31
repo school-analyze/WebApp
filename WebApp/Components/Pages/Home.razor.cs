@@ -50,10 +50,17 @@ public partial class Home
         }
     }
 
-    private Task OpenDialogAsync()
+    private async Task OpenDialogAsync(GradeModel grade)
     {
-        var options = new DialogOptions { CloseOnEscapeKey = true };
+        var parameters = new DialogParameters<AddGradeDialog> { { x => x.Grade, grade } };
 
-        return DialogService.ShowAsync<AddGradeDialog>("Simple Dialog", options);
+        var dialog = await DialogService.ShowAsync<AddGradeDialog>("Delete Server", parameters);
+        var result = await dialog.Result;
+
+        if (!result.Canceled)
+        {
+            //In a real world scenario we would reload the data from the source here since we "removed" it in the dialog already.
+            Guid.TryParse(result.Data.ToString(), out Guid deletedServer);
+        }
     }
 }

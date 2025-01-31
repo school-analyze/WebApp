@@ -38,8 +38,7 @@ else
                 <MudTd>@context.dateAdded</MudTd>
             </RowTemplate>
             <FooterContent>
-                <MudIconButton Icon="@Icons.Material.Filled.Add" Color="Color.Success" @onclick="OpenDialogAsync"></MudIconButton>
-                
+                <MudIconButton Icon="@Icons.Material.Filled.Add" Color="Color.Success" OnClick="@((e) => OpenDialogAsync(subjectGroup.FirstOrDefault()))"></MudIconButton>
             </FooterContent>
         </MudTable>
     }
