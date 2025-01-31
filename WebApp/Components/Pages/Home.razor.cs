@@ -8,7 +8,10 @@ namespace WebApp.Components.Pages;
 public partial class Home
 {
     private MudTheme _theme = new MudTheme();
+    private bool _open = false;
     [BindProperty] public IEnumerable<GradeModel>? Grades { get; set; }
+    
+    private void ToggleOpen() => _open = !_open;
 
     protected override async Task OnInitializedAsync()
     {
@@ -68,6 +71,16 @@ public partial class Home
         {
             //In a real world scenario we would reload the data from the source here since we "removed" it in the dialog already.
             Guid.TryParse(result.Data.ToString(), out Guid deletedServer);
+        }
+    }
+    
+    private async Task RemoveGradeAsync(int id)
+    {
+        var client = HttpClientFactory.CreateClient("WebApp.ServerAPI");
+        var response = await client.DeleteAsync($"/grades/delete/{id}");
+        if (response.IsSuccessStatusCode)
+        {
+            Grades = Grades?.Where(g => g.id != id);
         }
     }
 }
