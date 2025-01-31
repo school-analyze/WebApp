@@ -36,20 +36,27 @@ public partial class Home
 
     private MudColor GetGradeColor(decimal grade)
     {
-        if (grade >= 6)
+        return grade switch
         {
-            return _theme.PaletteLight.Success;
-        }
-        else if (grade >= 5.5m && grade < 6)
-        {
-            return _theme.PaletteLight.Warning;
-        }
-        else
-        {
-            return _theme.PaletteLight.Error;
-        }
+            >= 6 => _theme.PaletteLight.Success,
+            >= 5.5m and < 6 => _theme.PaletteLight.Warning,
+            _ => _theme.PaletteLight.Error
+        };
     }
 
+    private string FormatGrade(decimal grade)
+    {
+        if (grade % 1 == 0.85m)
+            return $"{Math.Floor(grade + 1)}-";
+        if (grade % 1 == 0.15m)
+            return $"{Math.Floor(grade)}+";
+        if (grade % 1 == 0.5m)
+            return $"{Math.Floor(grade)}\u00bd";
+        if (grade % 1 == 0)
+            return $"{Math.Floor(grade)}";
+        return grade.ToString();
+    }
+    
     private async Task OpenDialogAsync(GradeModel grade)
     {
         var parameters = new DialogParameters<AddGradeDialog> { { x => x.Grade, grade } };

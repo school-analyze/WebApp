@@ -33,12 +33,13 @@ else
                 <MudTh>Date</MudTh>
             </HeaderContent>
             <RowTemplate>
-                <MudTd>@context.grade</MudTd>
+                <MudTd>@FormatGrade(context.grade)</MudTd>
                 <MudTd>@context.percentageInfluence%</MudTd>
                 <MudTd>@context.dateAdded</MudTd>
             </RowTemplate>
             <FooterContent>
-                <MudIconButton Icon="@Icons.Material.Filled.Add" Color="Color.Success" OnClick="@((e) => OpenDialogAsync(subjectGroup.FirstOrDefault()))"></MudIconButton>
+                <MudIconButton Icon="@Icons.Material.Filled.Add" Color="Color.Success"
+                               OnClick="@((e) => OpenDialogAsync(subjectGroup.FirstOrDefault()))"></MudIconButton>
             </FooterContent>
         </MudTable>
     }
