@@ -33,7 +33,7 @@
 @code {
     private DateTime? _date1 = DateTime.Now;
     private Decimal _grade = 0;
-    private int _percentageInfluence = 0;
+    private int _percentageInfluence = 100;
 
     private Dictionary<string, decimal> _grades = new Dictionary<string, decimal>
     {
@@ -57,25 +57,25 @@
 
     private async Task AddGrade()
     {
+        GradeModel newGrade = new GradeModel
+        {
+            userId = 1,
+            subject = Grade.subject,
+            grade = _grade,
+            percentageInfluence = _percentageInfluence,
+            dateAdded = DateOnly.FromDateTime(_date1.Value)
+        };
         try
         {
             var client = HttpClientFactory.CreateClient("WebApp.ServerAPI");
-            Console.WriteLine(Grade.subject);
-            Console.WriteLine(_grade);
-            Console.WriteLine(_percentageInfluence);
-            Console.WriteLine(DateOnly.FromDateTime(_date1.Value));
-            var jsonContent = new StringContent(JsonSerializer.Serialize(new GradeModel
-            {
-                userId = 1,
-                subject = Grade.subject,
-                grade = _grade,
-                percentageInfluence = _percentageInfluence,
-                dateAdded = DateOnly.FromDateTime(_date1.Value)
-            }), Encoding.UTF8, "application/json");
+            var jsonContent = new StringContent(JsonSerializer.Serialize(newGrade), Encoding.UTF8, "application/json");
             using HttpResponseMessage response = await client.PostAsync("/grades/add", jsonContent);
 
             if (response.IsSuccessStatusCode)
+            {
+                MudDialog.Close(DialogResult.Ok(newGrade));
                 Snackbar.Add("Grade Added", Severity.Success);
+            }
             else
                 Snackbar.Add("Failed to add grade", Severity.Error);
         }
@@ -84,8 +84,6 @@
             Console.WriteLine(e);
             Snackbar.Add(e.ToString(), Severity.Error);
         }
-
-        MudDialog.Close(DialogResult.Ok(true));
     }
 
 }

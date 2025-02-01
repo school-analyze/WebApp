@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Mvc;
 using MudBlazor;
 using MudBlazor.Utilities;
 using WebApp.Models;
@@ -18,7 +19,7 @@ public partial class Home
         try
         {
             var client = HttpClientFactory.CreateClient("WebApp.ServerAPI");
-            var response = await client.GetAsync("/users/1/grades");
+            var response = await client.GetAsync("/users/1/grades"); 
             if (response.IsSuccessStatusCode)
             {
                 Grades = await client.GetFromJsonAsync<IEnumerable<GradeModel>>("/users/1/grades");
@@ -64,14 +65,17 @@ public partial class Home
     {
         var parameters = new DialogParameters<AddGradeDialog> { { x => x.Grade, grade } };
 
-        var dialog = await DialogService.ShowAsync<AddGradeDialog>("Delete Server", parameters);
+        var dialog = await DialogService.ShowAsync<AddGradeDialog>("Add Grade", parameters);
         var result = await dialog.Result;
 
         if (!result.Canceled)
         {
-            //In a real world scenario we would reload the data from the source here since we "removed" it in the dialog already.
-            Guid.TryParse(result.Data.ToString(), out Guid deletedServer);
+            ReloadPage(NavigationManager);
         }
+    }
+    public static void ReloadPage(NavigationManager manager)
+    {
+        manager.NavigateTo(manager.Uri, true);
     }
     
     private async Task RemoveGradeAsync(int id)
