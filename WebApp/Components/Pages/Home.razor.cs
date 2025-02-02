@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Components;
+﻿using System.Text;
+using System.Text.Json;
+using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Mvc;
 using MudBlazor;
 using MudBlazor.Utilities;
@@ -11,7 +13,7 @@ public partial class Home
     private MudTheme _theme = new MudTheme();
     private bool _open = false;
     [BindProperty] public IEnumerable<GradeModel>? Grades { get; set; }
-    
+
     private void ToggleOpen() => _open = !_open;
 
     protected override async Task OnInitializedAsync()
@@ -19,7 +21,7 @@ public partial class Home
         try
         {
             var client = HttpClientFactory.CreateClient("WebApp.ServerAPI");
-            var response = await client.GetAsync("/users/1/grades"); 
+            var response = await client.GetAsync("/users/1/grades");
             if (response.IsSuccessStatusCode)
             {
                 Grades = await client.GetFromJsonAsync<IEnumerable<GradeModel>>("/users/1/grades");
@@ -60,7 +62,7 @@ public partial class Home
             return $"{Math.Floor(grade)}";
         return grade.ToString();
     }
-    
+
     private async Task OpenDialogAsync(GradeModel grade)
     {
         var parameters = new DialogParameters<AddGradeDialog> { { x => x.Grade, grade } };
@@ -73,11 +75,12 @@ public partial class Home
             ReloadPage(NavigationManager);
         }
     }
+
     public static void ReloadPage(NavigationManager manager)
     {
         manager.NavigateTo(manager.Uri, true);
     }
-    
+
     private async Task RemoveGradeAsync(int id)
     {
         var client = HttpClientFactory.CreateClient("WebApp.ServerAPI");
@@ -85,6 +88,74 @@ public partial class Home
         if (response.IsSuccessStatusCode)
         {
             Grades = Grades?.Where(g => g.id != id);
+        }
+    }
+
+    private GradeModel _gradeBackup = new GradeModel();
+    private GradeModel selectedItem;
+
+    private void BackupItem(object grade)
+    {
+        if (grade is GradeModel current)
+        {
+            _newItemDate = ConvertDate(current.dateAdded);
+            _gradeBackup = new GradeModel
+            {
+                id = current.id,
+                userId = current.userId,
+                subject = current.subject,
+                grade = current.grade,
+                percentageInfluence = current.percentageInfluence,
+                dateAdded = current.dateAdded
+            };
+        }
+    }
+    
+    private DateTime? _newItemDate;
+    private int _newItemPercentageInfluence;
+    private decimal _newItemGrade;
+    private DateTime? ConvertDate(DateOnly date) => date.ToDateTime(TimeOnly.Parse("00:00:00"));
+    private void CommitEdit(object grade)
+    {
+        if (grade is GradeModel current)
+        {
+            Console.WriteLine(current.grade);
+            Console.WriteLine(current.percentageInfluence);
+            Console.WriteLine(current.dateAdded);
+            Console.WriteLine(current.id);
+            GradeModel gradeToCommit = new GradeModel()
+            {
+                id = current.id,
+                userId = current.userId,
+                subject = current.subject,
+                dateAdded = current.dateAdded,
+                percentageInfluence = current.percentageInfluence,
+                grade = current.grade,
+            };
+            try
+            {
+                var client = HttpClientFactory.CreateClient("WebApp.ServerAPI");
+                var jsonContent = new StringContent(JsonSerializer.Serialize(gradeToCommit), Encoding.UTF8, "application/json");
+                var response = client.PutAsJsonAsync($"/grades/update/{gradeToCommit.id}", jsonContent);
+                if (response.Result.IsSuccessStatusCode)
+                {
+                    // Handle success
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+            }
+        }
+    }
+
+    private void CancelEdit(object grade)
+    {
+        if (grade is GradeModel current)
+        {
+            current.grade = _gradeBackup.grade;
+            current.percentageInfluence = _gradeBackup.percentageInfluence;
+            current.dateAdded = _gradeBackup.dateAdded;
         }
     }
 }
