@@ -76,7 +76,7 @@ public partial class Home
         }
     }
 
-    public static void ReloadPage(NavigationManager manager)
+    private static void ReloadPage(NavigationManager manager)
     {
         manager.NavigateTo(manager.Uri, true);
     }
@@ -110,11 +110,12 @@ public partial class Home
             };
         }
     }
-    
+
     private DateTime? _newItemDate;
     private int _newItemPercentageInfluence;
     private decimal _newItemGrade;
     private DateTime? ConvertDate(DateOnly date) => date.ToDateTime(TimeOnly.Parse("00:00:00"));
+
     private void CommitEdit(object grade)
     {
         if (grade is GradeModel current)
@@ -128,18 +129,22 @@ public partial class Home
                 id = current.id,
                 userId = current.userId,
                 subject = current.subject,
-                dateAdded = current.dateAdded,
+                dateAdded = DateOnly.FromDateTime(_newItemDate ?? DateTime.Now),
                 percentageInfluence = current.percentageInfluence,
                 grade = current.grade,
             };
             try
             {
                 var client = HttpClientFactory.CreateClient("WebApp.ServerAPI");
-                var jsonContent = new StringContent(JsonSerializer.Serialize(gradeToCommit), Encoding.UTF8, "application/json");
-                var response = client.PutAsJsonAsync($"/grades/update/{gradeToCommit.id}", jsonContent);
+                var response = client.PutAsJsonAsync($"/grades/update/{gradeToCommit.id}", gradeToCommit);
                 if (response.Result.IsSuccessStatusCode)
                 {
-                    // Handle success
+                    ReloadPage(NavigationManager);
+                    Snackbar.Add("Grade Added", Severity.Success);
+                }
+                else
+                {
+                    Snackbar.Add("Grade not added", Severity.Error);
                 }
             }
             catch (Exception e)
