@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "b74sp1Cp22E=",
+  "dgSpecHash": "kSFUqYZ0BZI=",
   "success": true,
-  "projectFilePath": "D:\\RiderProjects\\WebApp\\WebApp\\WebApp.csproj",
+  "projectFilePath": "C:\\Users\\rohoz\\RiderProjects\\WebApp\\WebApp\\WebApp.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\rohoz\\.nuget\\packages\\microsoft.aspnetcore.authorization\\9.0.1\\microsoft.aspnetcore.authorization.9.0.1.nupkg.sha512",
     "C:\\Users\\rohoz\\.nuget\\packages\\microsoft.aspnetcore.components\\9.0.1\\microsoft.aspnetcore.components.9.0.1.nupkg.sha512",
