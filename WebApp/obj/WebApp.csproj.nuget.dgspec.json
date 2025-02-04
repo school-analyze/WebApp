@@ -1,25 +1,31 @@
 {
   "format": 1,
   "restore": {
-    "D:\\RiderProjects\\WebApp\\WebApp\\WebApp.csproj": {}
+    "C:\\Users\\rohoz\\RiderProjects\\WebApp\\WebApp\\WebApp.csproj": {}
   },
   "projects": {
-    "D:\\RiderProjects\\WebApp\\WebApp\\WebApp.csproj": {
+    "C:\\Users\\rohoz\\RiderProjects\\WebApp\\WebApp\\WebApp.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "D:\\RiderProjects\\WebApp\\WebApp\\WebApp.csproj",
+        "projectUniqueName": "C:\\Users\\rohoz\\RiderProjects\\WebApp\\WebApp\\WebApp.csproj",
         "projectName": "WebApp",
-        "projectPath": "D:\\RiderProjects\\WebApp\\WebApp\\WebApp.csproj",
+        "projectPath": "C:\\Users\\rohoz\\RiderProjects\\WebApp\\WebApp\\WebApp.csproj",
         "packagesPath": "C:\\Users\\rohoz\\.nuget\\packages\\",
-        "outputPath": "D:\\RiderProjects\\WebApp\\WebApp\\obj\\",
+        "outputPath": "C:\\Users\\rohoz\\RiderProjects\\WebApp\\WebApp\\obj\\",
         "projectStyle": "PackageReference",
+        "fallbackFolders": [
+          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
+        ],
         "configFilePaths": [
-          "C:\\Users\\rohoz\\AppData\\Roaming\\NuGet\\NuGet.Config"
+          "C:\\Users\\rohoz\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
           "net9.0"
         ],
         "sources": {
+          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
@@ -36,7 +42,7 @@
         "restoreAuditProperties": {
           "enableAudit": "true",
           "auditLevel": "low",
-          "auditMode": "direct"
+          "auditMode": "all"
         },
         "SdkAnalysisLevel": "9.0.100"
       },
@@ -68,7 +74,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.102/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.100/PortableRuntimeIdentifierGraph.json"
         }
       }
     }
