@@ -1,31 +1,24 @@
-﻿using System.Text;
-using System.Text.Json;
-using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using MudBlazor;
-using MudBlazor.Utilities;
 using WebApp.Models;
+using WebApp.Services;
 
 namespace WebApp.Components.Pages;
 
 public partial class Home
 {
-    private MudTheme _theme = new MudTheme();
-    private bool _open = false;
-    [BindProperty] public IEnumerable<GradeModel>? Grades { get; set; }
-
-    private void ToggleOpen() => _open = !_open;
+    [BindProperty] private IEnumerable<GradeModel>? Grades { get; set; }
+    private readonly MudTheme _theme = new();
+    
+    private GradeModel _gradeBackup = null!;
+    private GradeModel? _selectedItem;
+    private DateTime? _newItemDate;
 
     protected override async Task OnInitializedAsync()
     {
         try
         {
-            var client = HttpClientFactory.CreateClient("WebApp.ServerAPI");
-            var response = await client.GetAsync("/users/1/grades");
-            if (response.IsSuccessStatusCode)
-            {
-                Grades = await client.GetFromJsonAsync<IEnumerable<GradeModel>>("/users/1/grades");
-            }
+            Grades = await RequestService.GetGrades(1, HttpClientFactory);
         }
         catch (Exception ex)
         {
@@ -33,34 +26,17 @@ public partial class Home
         }
     }
 
-    private decimal SubjectAverageGrade(IGrouping<Subject, GradeModel> subjectGroup)
+    private async Task RemoveGradeAsync(int id)
     {
-        var totalWeightedGrades = subjectGroup.Sum(g => g.grade * g.percentageInfluence);
-        var totalPercentageInfluence = subjectGroup.Sum(g => g.percentageInfluence);
-        return Math.Round(totalWeightedGrades / totalPercentageInfluence, 2);
-    }
-
-    private MudColor GetGradeColor(decimal grade)
-    {
-        return grade switch
+        if (await RequestService.RemoveGradeAsync(id, HttpClientFactory))
         {
-            >= 6 => _theme.PaletteLight.Success,
-            >= 5.5m and < 6 => _theme.PaletteLight.Warning,
-            _ => _theme.PaletteLight.Error
-        };
-    }
-
-    private string FormatGrade(decimal grade)
-    {
-        if (grade % 1 == 0.85m)
-            return $"{Math.Floor(grade + 1)}-";
-        if (grade % 1 == 0.15m)
-            return $"{Math.Floor(grade)}+";
-        if (grade % 1 == 0.5m)
-            return $"{Math.Floor(grade)}\u00bd";
-        if (grade % 1 == 0)
-            return $"{Math.Floor(grade)}";
-        return grade.ToString();
+            ReloadPage();
+            Snackbar.Add("Grade Removed", Severity.Success);
+        }
+        else
+        {
+            Snackbar.Add("Grade not removed", Severity.Error);
+        }
     }
 
     private async Task OpenDialogAsync(GradeModel grade)
@@ -70,87 +46,56 @@ public partial class Home
         var dialog = await DialogService.ShowAsync<AddGradeDialog>("Add Grade", parameters);
         var result = await dialog.Result;
 
-        if (!result.Canceled)
+        if (result is { Canceled: false })
         {
-            ReloadPage(NavigationManager);
+            ReloadPage();
         }
     }
-
-    private static void ReloadPage(NavigationManager manager)
-    {
-        manager.NavigateTo(manager.Uri, true);
-    }
-
-    private async Task RemoveGradeAsync(int id)
-    {
-        var client = HttpClientFactory.CreateClient("WebApp.ServerAPI");
-        var response = await client.DeleteAsync($"/grades/delete/{id}");
-        if (response.IsSuccessStatusCode)
-        {
-            Grades = Grades?.Where(g => g.id != id);
-        }
-    }
-
-    private GradeModel _gradeBackup = new GradeModel();
-    private GradeModel selectedItem;
-
+    private void ReloadPage() => NavigationManager.NavigateTo(NavigationManager.Uri, true);
+    
     private void BackupItem(object grade)
     {
-        if (grade is GradeModel current)
+        if (grade is not GradeModel current) return;
+        _newItemDate = ConvertDate(current.dateAdded);
+        _gradeBackup = new GradeModel
         {
-            _newItemDate = ConvertDate(current.dateAdded);
-            _gradeBackup = new GradeModel
-            {
-                id = current.id,
-                userId = current.userId,
-                subject = current.subject,
-                grade = current.grade,
-                percentageInfluence = current.percentageInfluence,
-                dateAdded = current.dateAdded
-            };
-        }
+            id = current.id,
+            userId = current.userId,
+            subject = current.subject,
+            grade = current.grade,
+            percentageInfluence = current.percentageInfluence,
+            dateAdded = current.dateAdded
+        };
     }
-
-    private DateTime? _newItemDate;
-    private int _newItemPercentageInfluence;
-    private decimal _newItemGrade;
-    private DateTime? ConvertDate(DateOnly date) => date.ToDateTime(TimeOnly.Parse("00:00:00"));
+    private static DateTime? ConvertDate(DateOnly date) => date.ToDateTime(TimeOnly.MinValue);
 
     private void CommitEdit(object grade)
     {
-        if (grade is GradeModel current)
+        if (grade is not GradeModel current) return;
+        GradeModel gradeToCommit = new()
         {
-            Console.WriteLine(current.grade);
-            Console.WriteLine(current.percentageInfluence);
-            Console.WriteLine(current.dateAdded);
-            Console.WriteLine(current.id);
-            GradeModel gradeToCommit = new GradeModel()
+            id = current.id,
+            userId = current.userId,
+            subject = current.subject,
+            dateAdded = DateOnly.FromDateTime(_newItemDate ?? DateTime.Now),
+            percentageInfluence = current.percentageInfluence,
+            grade = current.grade,
+        };
+        try
+        {
+            var client = HttpClientFactory.CreateClient("WebApp.ServerAPI");
+            var response = client.PutAsJsonAsync($"/grades/update/{gradeToCommit.id}", gradeToCommit);
+            if (response.Result.IsSuccessStatusCode)
             {
-                id = current.id,
-                userId = current.userId,
-                subject = current.subject,
-                dateAdded = DateOnly.FromDateTime(_newItemDate ?? DateTime.Now),
-                percentageInfluence = current.percentageInfluence,
-                grade = current.grade,
-            };
-            try
-            {
-                var client = HttpClientFactory.CreateClient("WebApp.ServerAPI");
-                var response = client.PutAsJsonAsync($"/grades/update/{gradeToCommit.id}", gradeToCommit);
-                if (response.Result.IsSuccessStatusCode)
-                {
-                    ReloadPage(NavigationManager);
-                    Snackbar.Add("Grade Added", Severity.Success);
-                }
-                else
-                {
-                    Snackbar.Add("Grade not added", Severity.Error);
-                }
+                Snackbar.Add("Grade Updated", Severity.Success);
+                ReloadPage();
             }
-            catch (Exception e)
-            {
-                Console.WriteLine(e);
-            }
+            else
+                Snackbar.Add("Grade not updated", Severity.Error);
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
         }
     }
 

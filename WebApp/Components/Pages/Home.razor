@@ -1,9 +1,5 @@
 ﻿@page "/"
-@using System.ComponentModel
-@using Microsoft.AspNetCore.Mvc
-@using WebApp.Models
-@using MudBlazor;
-@using MudBlazor.Utilities;
+@using WebApp.Services
 @inject IHttpClientFactory HttpClientFactory
 @inject IDialogService DialogService
 @inject NavigationManager NavigationManager
@@ -24,7 +20,7 @@ else
     {
         // OnCommitEditClick="@(() => Snackbar.Add("Commit Edit Handler Invoked"))"
         <MudTable Items="subjectGroup" Hover="true" Dense="true" Bordered="true" CanCancelEdit="true"
-                  @bind-SelectedItem="selectedItem" CommitEditTooltip="Commit Edit"
+                  @bind-SelectedItem="_selectedItem" CommitEditTooltip="Commit Edit"
                   RowEditPreview="BackupItem" RowEditCancel="CancelEdit"
                   RowEditCommit="CommitEdit"
                   IsEditRowSwitchingBlocked="false"
@@ -36,8 +32,8 @@ else
                 <MudText Typo="Typo.h6" Class="fw-bold">@subjectGroup.Key</MudText>
                 <MudSpacer/>
                 <MudText Typo="Typo.h6" Class="fw-bold"
-                         Style="@($"color:{GetGradeColor(SubjectAverageGrade(subjectGroup))}")">Average
-                    grade: @SubjectAverageGrade(subjectGroup)</MudText>
+                         Style="@($"color:{GradesUtils.GetGradeColor(GradesUtils.SubjectAverageGrade(subjectGroup), _theme)}")">Average
+                    grade: @GradesUtils.SubjectAverageGrade(subjectGroup)</MudText>
             </ToolBarContent>
             <HeaderContent>
                 <MudTh>Grade</MudTh>
@@ -48,7 +44,7 @@ else
                 <MudTd Style="text-align: center; max-width: 20px">
                     <MudIconButton Icon="@Icons.Material.Filled.DeleteForever" Color="Color.Error"
                                    OnClick="@(() => RemoveGradeAsync(context.id))"></MudIconButton>
-                    <span style="@($"color:{GetGradeColor(context.grade)}")">@FormatGrade(context.grade)</span></MudTd>
+                    <span style="@($"color:{GradesUtils.GetGradeColor(context.grade, _theme)}")">@GradesUtils.FormatGrade(context.grade)</span></MudTd>
                 <MudTd>@context.percentageInfluence%</MudTd>
                 <MudTd>@context.dateAdded</MudTd>
             </RowTemplate>
