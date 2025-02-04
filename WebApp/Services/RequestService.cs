@@ -20,4 +20,10 @@ public static class RequestService
         var response = await client.DeleteAsync($"/grades/delete/{id}");
         return response.IsSuccessStatusCode;
     }
+    public static async Task<bool> AddGradeAsync(GradeModel grade, IHttpClientFactory httpClientFactory)
+    {
+        var client = httpClientFactory.CreateClient("WebApp.ServerAPI");
+        var response = await client.PostAsJsonAsync("/grades/add", grade);
+        return response.IsSuccessStatusCode;
+    }
 }
